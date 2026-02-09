@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Art Mood Explorer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="container">
+    <h1>Art Mood Explorer</h1>
+    <p class="subtitle">
+      Discover artworks based on your mood
+    </p>
+
+    <!-- Mood Buttons -->
+    <div class="moods">
+      <button onclick="loadMood('calm')">Calm</button>
+      <button onclick="loadMood('energetic')">Energetic</button>
+      <button onclick="loadMood('dark')">Dark</button>
+      <button onclick="loadMood('warm')">Warm</button>
+      <button onclick="loadMood('romantic')">Romantic</button>
+    </div>
+
+    <!-- Artwork Display -->
+    <div id="artwork" class="artwork">
+      <p class="placeholder">Select a mood to explore art</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      Data from the
+      <a href="https://api.artic.edu" target="_blank">
+        Art Institute of Chicago
+      </a>
+    </p>
+  </footer>
+
+  <script>
+    const moodMap = {
+      calm: "water landscape",
+      energetic: "abstract expressionism",
+      dark: "night",
+      warm: "sunlight",
+      romantic: "flowers portrait"
+    };
+
+    async function loadMood(mood) {
+      const query = moodMap[mood];
+      const page = Math.floor(Math.random() * 10) + 1;
+
+      const url = `https://api.artic.edu/api/v1/artworks/search?q=${encodeURIComponent(
+        query
+      )}&limit=12&page=${page}&fields=id,title,artist_display,date_display,image_id`;
+
+      try {
+        document.getElementById("artwork").innerHTML = `
+          <div class="loading">Loading artwork...</div>
+        `;
+
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        const artworksWithImages = data.data.filter(art => art.image_id);
+        
+        if (artworksWithImages.length > 0) {
+          const randomArt = artworksWithImages[Math.floor(Math.random() * artworksWithImages.length)];
+          displayArt(randomArt, mood);
+        } else {
+          document.getElementById("artwork").innerHTML =
+            "<p class='placeholder'>No artwork found for this mood. Try another!</p>";
+        }
+      } catch (error) {
+        console.error(error);
+        document.getElementById("artwork").innerHTML =
+          "<p class='placeholder'>Failed to load artwork. Please try again.</p>";
+      }
+    }
+
+    function displayArt(art, mood) {
+      if (!art) {
+        document.getElementById("artwork").innerHTML =
+          "<p class='placeholder'>No artwork found for this mood.</p>";
+        return;
+      }
+
+      const imageUrl = art.image_id
+        ? `https://www.artic.edu/iiif/2/${art.image_id}/full/843,/0/default.jpg`
+        : "";
+
+      document.getElementById("artwork").innerHTML = `
+        <div class="art-card">
+          ${imageUrl ? `<img src="${imageUrl}" alt="${art.title}" onerror="this.parentElement.innerHTML='<p class=\\'placeholder\\'>Image unavailable</p>'">` : ""}
+          <div class="art-info">
+            <h2>${art.title || "Untitled"}</h2>
+            <p class="artist">${art.artist_display || "Unknown Artist"}</p>
+            ${art.date_display ? `<p class="date">${art.date_display}</p>` : ""}
+            <span class="mood-tag">${mood}</span>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
