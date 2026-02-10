@@ -1,210 +1,64 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background: #0a0a0a;
+  font-family: 'Georgia', serif;
+  background: #111; /* Keep it dark to focus on art */
   color: white;
-  line-height: 1.6;
   min-height: 100vh;
-  overflow: hidden;
 }
 
-.container {
-  position: relative;
-  z-index: 10;
-  padding: 2rem 1.5rem;
-  text-align: center;
-}
+.container { padding: 2rem; text-align: center; }
 
-h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.5rem;
-  color: white;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-.subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
-  margin-bottom: 2rem;
-  font-weight: 400;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-/* Mood Buttons */
 .moods {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 10px;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .moods button {
-  padding: 0.625rem 1.5rem;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  padding: 10px 20px;
+  background: #222;
+  border: 1px solid #444;
   color: white;
-  font-size: 0.9rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-  outline: none;
+  transition: 0.3s;
 }
 
-.moods button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
-}
+.moods button:hover { background: white; color: black; }
 
-.moods button:active {
-  transform: translateY(0);
-}
+#surprise { background: #4a148c; border: none; font-weight: bold; }
 
-/* Artwork Display */
 .artwork {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.loading {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 1rem;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-.placeholder {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 1.125rem;
-  text-align: center;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-.art-card {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  animation: fadeIn 0.6s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  flex-direction: column;
+  gap: 50px;
 }
 
 .art-card img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  max-height: 80vh;
+  object-fit: contain;
+  cursor: zoom-in;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  transition: transform 0.3s ease;
 }
 
-.art-info {
+.art-card img.zoomed {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 2.5rem 2rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%);
-  z-index: 20;
-  backdrop-filter: blur(5px);
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  max-height: 100vh;
+  z-index: 1000;
+  background: rgba(0,0,0,0.95);
+  cursor: zoom-out;
+  padding: 20px;
 }
 
-.art-card h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: white;
-  line-height: 1.2;
-}
+.art-info { text-align: left; margin-top: 15px; border-left: 3px solid #666; padding-left: 15px; }
 
-.artist {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.125rem;
-  margin-bottom: 0.25rem;
-}
-
-.date {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.95rem;
-  margin-bottom: 1rem;
-}
-
-.mood-tag {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-transform: capitalize;
-  margin-top: 0.5rem;
-}
-
-footer {
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  z-index: 30;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.6);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-footer a {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  transition: color 0.2s ease;
-}
-
-footer a:hover {
-  color: white;
-  border-bottom-color: white;
-}
-
-@media (max-width: 640px) {
-  h1 {
-    font-size: 2rem;
-  }
-
-  .moods button {
-    font-size: 0.85rem;
-    padding: 0.5rem 1.25rem;
-  }
-
-  .art-info {
-    padding: 2rem 1.5rem;
-  }
-
-  .art-card h2 {
-    font-size: 1.5rem;
-  }
-
-  .artist {
-    font-size: 1rem;
-  }
-}
+footer { margin-top: 50px; font-size: 0.8rem; color: #666; }
+footer a { color: #888; }

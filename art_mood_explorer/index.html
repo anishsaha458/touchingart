@@ -3,105 +3,729 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Art Mood Explorer</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Mood Gallery · Emotional Curation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@300;400;600&family=Archivo+Narrow:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --noir: #0d0d0d;
+      --charcoal: #1a1a1a;
+      --smoke: #2d2d2d;
+      --cream: #f4f1ea;
+      --gold: #d4af37;
+      --rust: #c14d36;
+      --sage: #8b9b7e;
+      --slate: #5a6a7a;
+    }
+
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background: var(--noir);
+      color: var(--cream);
+      min-height: 100vh;
+      line-height: 1.7;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Film grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.03) 2px, rgba(0,0,0,.03) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,.03) 2px, rgba(0,0,0,.03) 4px);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 10000;
+      mix-blend-mode: overlay;
+    }
+
+    /* Atmospheric gradient background */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -50%;
+      right: -20%;
+      width: 80%;
+      height: 150%;
+      background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.08), transparent 60%);
+      transform: rotate(-15deg);
+      pointer-events: none;
+      z-index: 0;
+      animation: breathe 20s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.3; transform: rotate(-15deg) scale(1); }
+      50% { opacity: 0.6; transform: rotate(-17deg) scale(1.1); }
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header with asymmetric layout */
+    header {
+      padding: clamp(4rem, 8vw, 8rem) clamp(2rem, 4vw, 4rem);
+      margin-bottom: clamp(3rem, 6vw, 6rem);
+      position: relative;
+      border-bottom: 1px solid rgba(244, 241, 234, 0.1);
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      opacity: 0.5;
+    }
+
+    .header-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 3rem;
+      align-items: end;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 7vw, 6.5rem);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      color: var(--cream);
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    h1::first-letter {
+      font-size: 1.4em;
+      color: var(--gold);
+    }
+
+    .subtitle {
+      font-family: 'Archivo Narrow', sans-serif;
+      font-size: clamp(0.85rem, 1.2vw, 1rem);
+      color: rgba(244, 241, 234, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      font-weight: 400;
+      margin-top: 2rem;
+    }
+
+    .header-accent {
+      font-family: 'Archivo Narrow', sans-serif;
+      font-size: clamp(0.75rem, 1vw, 0.9rem);
+      color: rgba(244, 241, 234, 0.4);
+      text-align: right;
+      line-height: 1.8;
+      padding-right: 2rem;
+      border-right: 1px solid rgba(244, 241, 234, 0.15);
+      align-self: center;
+    }
+
+    /* Mood selector with magazine-style layout */
+    .mood-section {
+      padding: 0 clamp(2rem, 4vw, 4rem);
+      margin-bottom: clamp(4rem, 8vw, 8rem);
+    }
+
+    .mood-label {
+      font-family: 'Archivo Narrow', sans-serif;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: rgba(244, 241, 234, 0.4);
+      margin-bottom: 2rem;
+      padding-left: 1rem;
+      border-left: 2px solid var(--gold);
+    }
+
+    .moods {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1px;
+      background: rgba(244, 241, 234, 0.05);
+      border: 1px solid rgba(244, 241, 234, 0.08);
+      margin-bottom: 3rem;
+    }
+
+    .moods button {
+      padding: 2.5rem 2rem;
+      background: var(--noir);
+      border: none;
+      color: var(--cream);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      font-style: italic;
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .moods button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.15), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .moods button:hover::before {
+      left: 100%;
+    }
+
+    .moods button:hover {
+      background: var(--charcoal);
+      color: var(--gold);
+      transform: scale(1.02);
+      z-index: 10;
+    }
+
+    .moods button::after {
+      content: attr(data-mood);
+      position: absolute;
+      bottom: 0.75rem;
+      right: 1rem;
+      font-family: 'Archivo Narrow', sans-serif;
+      font-size: 0.65rem;
+      font-style: normal;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
+    }
+
+    .moods button:hover::after {
+      opacity: 0.6;
+    }
+
+    #surprise {
+      grid-column: span 2;
+      background: linear-gradient(135deg, var(--rust) 0%, var(--gold) 100%);
+      color: var(--noir);
+      font-weight: 600;
+      font-size: 1.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #surprise::before {
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    }
+
+    #surprise:hover {
+      transform: scale(1.02);
+      box-shadow: 0 20px 60px rgba(212, 175, 55, 0.3);
+    }
+
+    /* Gallery with overlapping asymmetric cards */
+    .artwork {
+      position: relative;
+      min-height: 60vh;
+    }
+
+    .placeholder,
+    .loading {
+      text-align: center;
+      padding: 8rem 2rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-style: italic;
+      color: rgba(244, 241, 234, 0.3);
+    }
+
+    .loading {
+      color: var(--gold);
+      animation: fadeInOut 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    .art-card {
+      margin: 0 clamp(2rem, 4vw, 4rem) 6rem;
+      position: relative;
+      animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    .art-card::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: 20px;
+      bottom: 20px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), transparent);
+      transform: rotate(-1deg);
+      transition: all 0.5s ease;
+      z-index: -1;
+      opacity: 0;
+    }
+
+    .art-card:hover::before {
+      opacity: 1;
+      transform: rotate(-2deg);
+    }
+
+    .image-wrapper {
+      position: relative;
+      overflow: hidden;
+      background: var(--charcoal);
+      border: 1px solid rgba(244, 241, 234, 0.15);
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .image-wrapper::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 60%, rgba(0, 0, 0, 0.4));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+
+    .art-card:hover .image-wrapper::after {
+      opacity: 1;
+    }
+
+    .art-card img {
+      width: 100%;
+      height: auto;
+      max-height: 85vh;
+      object-fit: contain;
+      display: block;
+      cursor: pointer;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: contrast(1.05) saturate(1.1);
+    }
+
+    .art-card:hover img {
+      transform: scale(1.02);
+    }
+
+    .art-card img.zoomed {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      max-height: 100vh;
+      z-index: 20000;
+      background: rgba(13, 13, 13, 0.98);
+      cursor: zoom-out;
+      padding: 3rem;
+      object-fit: contain;
+      transform: scale(1) !important;
+    }
+
+    body.zoom-active::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 13, 13, 0.97);
+      z-index: 19999;
+      backdrop-filter: blur(20px);
+    }
+
+    .art-info {
+      padding: 2.5rem 2rem;
+      background: linear-gradient(to bottom, transparent, rgba(26, 26, 26, 0.5));
+      border-top: 1px solid rgba(244, 241, 234, 0.08);
+      position: relative;
+    }
+
+    .art-info::before {
+      content: '';
+      position: absolute;
+      left: 2rem;
+      top: 0;
+      width: 60px;
+      height: 2px;
+      background: var(--gold);
+    }
+
+    .art-info h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--cream);
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .art-info .metadata {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      font-family: 'Archivo Narrow', sans-serif;
+      font-size: 0.9rem;
+      color: rgba(244, 241, 234, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    .metadata span {
+      position: relative;
+      padding-left: 1rem;
+    }
+
+    .metadata span::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+    }
+
+    /* Gallery navigation */
+    .gallery-nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 3rem;
+      padding: 3rem 2rem;
+      margin: 2rem clamp(2rem, 4vw, 4rem);
+      border-top: 1px solid rgba(244, 241, 234, 0.08);
+      border-bottom: 1px solid rgba(244, 241, 234, 0.08);
+    }
+
+    .gallery-nav button {
+      padding: 1rem 2.5rem;
+      background: transparent;
+      border: 1px solid rgba(244, 241, 234, 0.2);
+      color: var(--cream);
+      font-family: 'Archivo Narrow', sans-serif;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gallery-nav button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--gold);
+      transition: left 0.4s ease;
+      z-index: -1;
+    }
+
+    .gallery-nav button:hover:not(:disabled)::before {
+      left: 0;
+    }
+
+    .gallery-nav button:hover:not(:disabled) {
+      color: var(--noir);
+      border-color: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    .gallery-nav button:disabled {
+      opacity: 0.2;
+      cursor: not-allowed;
+    }
+
+    .gallery-counter {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--gold);
+      min-width: 100px;
+      text-align: center;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 8rem;
+      padding: 3rem clamp(2rem, 4vw, 4rem);
+      text-align: center;
+      font-family: 'Archivo Narrow', sans-serif;
+      font-size: 0.75rem;
+      color: rgba(244, 241, 234, 0.3);
+      border-top: 1px solid rgba(244, 241, 234, 0.08);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+
+    footer a {
+      color: var(--gold);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      border-bottom: 1px solid transparent;
+    }
+
+    footer a:hover {
+      color: var(--cream);
+      border-bottom-color: var(--gold);
+    }
+
+    /* Animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(60px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .header-accent {
+        text-align: left;
+        border-right: none;
+        border-left: 1px solid rgba(244, 241, 234, 0.15);
+        padding-left: 1.5rem;
+        padding-right: 0;
+      }
+
+      .moods {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .moods button {
+        padding: 2rem 1.5rem;
+        font-size: 1.25rem;
+      }
+
+      #surprise {
+        grid-column: span 2;
+        font-size: 1.5rem;
+      }
+
+      .art-card img.zoomed {
+        padding: 1.5rem;
+      }
+
+      .gallery-nav {
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .gallery-nav button {
+        padding: 0.875rem 1.75rem;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <div>
+          <h1>Mood Gallery</h1>
+          <p class="subtitle">Emotional Curation</p>
+        </div>
+        <div class="header-accent">
+          Select an emotional<br>
+          state and discover<br>
+          masterworks that<br>
+          resonate with your<br>
+          current sensibility
+        </div>
+      </div>
+    </header>
 
-  <main class="container">
-    <h1>Art Mood Explorer</h1>
-    <p class="subtitle">
-      Discover artworks based on your mood
-    </p>
-
-    <!-- Mood Buttons -->
-    <div class="moods">
-      <button onclick="loadMood('calm')">Calm</button>
-      <button onclick="loadMood('energetic')">Energetic</button>
-      <button onclick="loadMood('dark')">Dark</button>
-      <button onclick="loadMood('warm')">Warm</button>
-      <button onclick="loadMood('romantic')">Romantic</button>
+    <div class="mood-section">
+      <div class="mood-label">Select Your Emotional State</div>
+      <div class="moods">
+        <button onclick="loadMood('calm')" data-mood="01">Calm</button>
+        <button onclick="loadMood('energetic')" data-mood="02">Energetic</button>
+        <button onclick="loadMood('dark')" data-mood="03">Dark</button>
+        <button onclick="loadMood('warm')" data-mood="04">Warm</button>
+        <button onclick="loadMood('romantic')" data-mood="05">Romantic</button>
+        <button id="surprise" onclick="loadSurprise()" data-mood="✦">✦ Surprise Me</button>
+      </div>
     </div>
 
-    <!-- Artwork Display -->
     <div id="artwork" class="artwork">
-      <p class="placeholder">Select a mood to explore art</p>
+      <p class="placeholder">Begin your journey through emotion and art</p>
     </div>
-  </main>
+  </div>
 
   <footer>
-    <p>
-      Data from the
-      <a href="https://api.artic.edu" target="_blank">
-        Art Institute of Chicago
-      </a>
-    </p>
+    <p>Curated from the permanent collection of the <a href="https://api.artic.edu" target="_blank">Art Institute of Chicago</a></p>
   </footer>
 
   <script>
     const moodMap = {
-      calm: "water landscape",
-      energetic: "abstract expressionism",
-      dark: "night",
-      warm: "sunlight",
-      romantic: "flowers portrait"
+      calm: "water lilies serene landscape blue",
+      energetic: "abstract movement vibrant red",
+      dark: "night noir shadow mystery",
+      warm: "sunset golden autumn yellow",
+      romantic: "portrait flowers soft impressionism"
     };
 
-    async function loadMood(mood) {
-      const query = moodMap[mood];
-      const page = Math.floor(Math.random() * 10) + 1;
+    let currentArtworks = [];
+    let currentIndex = 0;
 
-      const url = `https://api.artic.edu/api/v1/artworks/search?q=${encodeURIComponent(
-        query
-      )}&limit=12&page=${page}&fields=id,title,artist_display,date_display,image_id`;
+    async function loadMood(mood) {
+      const displayArea = document.getElementById("artwork");
+      displayArea.innerHTML = `<div class="loading">Curating ${mood} masterpieces...</div>`;
 
       try {
-        document.getElementById("artwork").innerHTML = `
-          <div class="loading">Loading artwork...</div>
-        `;
-
+        const query = moodMap[mood];
+        const randomPage = Math.floor(Math.random() * 5) + 1;
+        const url = `https://api.artic.edu/api/v1/artworks/search?q=${encodeURIComponent(query)}&fields=id,title,artist_title,image_id,date_display&limit=10&page=${randomPage}`;
+        
         const res = await fetch(url);
         const data = await res.json();
-        
-        const artworksWithImages = data.data.filter(art => art.image_id);
-        
-        if (artworksWithImages.length > 0) {
-          const randomArt = artworksWithImages[Math.floor(Math.random() * artworksWithImages.length)];
-          displayArt(randomArt, mood);
+        currentArtworks = (data.data || []).filter(a => a.image_id);
+        currentIndex = 0;
+
+        if (currentArtworks.length > 0) {
+          displayGallery();
         } else {
-          document.getElementById("artwork").innerHTML =
-            "<p class='placeholder'>No artwork found for this mood. Try another!</p>";
+          displayArea.innerHTML = `<p class="placeholder">No artworks found. Try another emotional state.</p>`;
         }
-      } catch (error) {
-        console.error(error);
-        document.getElementById("artwork").innerHTML =
-          "<p class='placeholder'>Failed to load artwork. Please try again.</p>";
+      } catch (err) {
+        displayArea.innerHTML = `<p class="placeholder">Unable to load gallery. Please try again.</p>`;
       }
     }
 
-    function displayArt(art, mood) {
-      if (!art) {
-        document.getElementById("artwork").innerHTML =
-          "<p class='placeholder'>No artwork found for this mood.</p>";
-        return;
+    async function loadSurprise() {
+      const displayArea = document.getElementById("artwork");
+      displayArea.innerHTML = `<div class="loading">Discovering something unexpected...</div>`;
+      
+      try {
+        const randomPage = Math.floor(Math.random() * 1000) + 1;
+        const url = `https://api.artic.edu/api/v1/artworks?fields=id,title,artist_title,image_id,date_display&limit=1&page=${randomPage}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const art = data.data[0];
+
+        if (!art || !art.image_id) return loadSurprise();
+        
+        currentArtworks = [art];
+        currentIndex = 0;
+        displayGallery();
+      } catch (err) {
+        console.error("Fetch error:", err);
       }
+    }
 
-      const imageUrl = art.image_id
-        ? `https://www.artic.edu/iiif/2/${art.image_id}/full/843,/0/default.jpg`
-        : "";
+    function displayGallery() {
+      const displayArea = document.getElementById("artwork");
+      const art = currentArtworks[currentIndex];
+      
+      displayArea.innerHTML = `
+        ${renderArtCard(art)}
+        ${currentArtworks.length > 1 ? `
+          <div class="gallery-nav">
+            <button onclick="previousArt()" ${currentIndex === 0 ? 'disabled' : ''}>← Previous</button>
+            <span class="gallery-counter">${currentIndex + 1} of ${currentArtworks.length}</span>
+            <button onclick="nextArt()" ${currentIndex === currentArtworks.length - 1 ? 'disabled' : ''}>Next →</button>
+          </div>
+        ` : ''}
+      `;
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-      document.getElementById("artwork").innerHTML = `
+    function nextArt() {
+      if (currentIndex < currentArtworks.length - 1) {
+        currentIndex++;
+        displayGallery();
+      }
+    }
+
+    function previousArt() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        displayGallery();
+      }
+    }
+
+    function renderArtCard(art) {
+      const imgUrl = `https://www.artic.edu/iiif/2/${art.image_id}/full/843,/0/default.jpg`;
+      return `
         <div class="art-card">
-          ${imageUrl ? `<img src="${imageUrl}" alt="${art.title}" onerror="this.parentElement.innerHTML='<p class=\\'placeholder\\'>Image unavailable</p>'">` : ""}
+          <div class="image-wrapper">
+            <img src="${imgUrl}" alt="${art.title}" onclick="toggleZoom(this)" title="Click for fullscreen view">
+          </div>
           <div class="art-info">
-            <h2>${art.title || "Untitled"}</h2>
-            <p class="artist">${art.artist_display || "Unknown Artist"}</p>
-            ${art.date_display ? `<p class="date">${art.date_display}</p>` : ""}
-            <span class="mood-tag">${mood}</span>
+            <h2>${art.title || 'Untitled'}</h2>
+            <div class="metadata">
+              <span>${art.artist_title || 'Unknown Artist'}</span>
+              <span>${art.date_display || 'Date unknown'}</span>
+            </div>
           </div>
         </div>
       `;
     }
+
+    function toggleZoom(img) {
+      const isZoomed = img.classList.contains('zoomed');
+      
+      if (isZoomed) {
+        img.classList.remove('zoomed');
+        document.body.classList.remove('zoom-active');
+        document.body.style.overflow = 'auto';
+      } else {
+        img.classList.add('zoomed');
+        document.body.classList.add('zoom-active');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const zoomedImg = document.querySelector('.zoomed');
+        if (zoomedImg) {
+          toggleZoom(zoomedImg);
+        }
+      } else if (e.key === 'ArrowRight') {
+        nextArt();
+      } else if (e.key === 'ArrowLeft') {
+        previousArt();
+      }
+    });
   </script>
 </body>
 </html>
