@@ -40,3 +40,7 @@ REST: example: GET /api/v1/artworks/27992
 Wrappers: For the AIC API, there is no official wrapper 
 
 
+Prompt Log:
+Claude, ChatGPT, and Gemini used to generate code. 
+-utilize the AIC API to show art
+
